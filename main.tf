@@ -182,6 +182,8 @@ resource "aws_iam_role" "this" {
 # IAM Role Policy
 ################################################################################
 
+data "aws_caller_identity" "current" {}
+
 data "aws_iam_policy_document" "this" {
   count = local.create_iam_role && var.create_iam_policy ? 1 : 0
 
@@ -224,6 +226,20 @@ data "aws_iam_policy_document" "this" {
     ]
 
     resources = distinct([for auth in var.auth : auth.secret_arn])
+  }
+
+  dynamic "statement" {
+    for_each = var.default_auth_scheme == "IAM_AUTH" ? var.iam_users : []
+
+    content {
+      sid    = "RdsDBConnect"
+      effect = "Allow"
+      actions = [
+        "rds-db:connect"
+      ]
+      
+      resources = distinct([for user in var.iam_users : "arn:aws:rds-db:${local.region}:${data.aws_caller_identity.current.account_id}:dbuser:${var.rds_resource_id}/${user}"])
+    }
   }
 }
 

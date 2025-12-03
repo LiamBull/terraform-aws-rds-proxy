@@ -294,3 +294,15 @@ variable "kms_key_arns" {
   type        = list(string)
   default     = []
 }
+
+variable "rds_resource_id" {
+  description = "The resource ID of the cluster or instance (eg. cluster-..., db-...)"
+  type        = string
+  default     = null
+}
+
+variable "iam_users" {
+  description = "List of usernames to provide access to via IAM"
+  type        = list(string)
+  default     = []
+}
